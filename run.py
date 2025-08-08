@@ -227,6 +227,45 @@ def check_node_and_npm():
         print("📋 npm should come with Node.js installation")
         return False
 
+def check_frontend_dependencies():
+    """Check if frontend dependencies are properly installed"""
+    frontend_dir = Path("frontend")
+    if not frontend_dir.exists():
+        return False
+    
+    node_modules = frontend_dir / "node_modules"
+    package_json = frontend_dir / "package.json"
+    
+    # Check if node_modules exists
+    if not node_modules.exists():
+        return False
+    
+    # Check if package.json exists
+    if not package_json.exists():
+        print("⚠️ Warning: package.json not found in frontend directory")
+        return False
+    
+    # Check critical dependencies
+    critical_deps = [
+        'react',
+        'typescript', 
+        'vite',
+        '@types/react',
+        'tailwindcss'
+    ]
+    
+    missing_deps = []
+    for dep in critical_deps:
+        dep_path = node_modules / dep
+        if not dep_path.exists():
+            missing_deps.append(dep)
+    
+    if missing_deps:
+        print(f"⚠️ Missing critical dependencies: {', '.join(missing_deps)}")
+        return False
+    
+    return True
+
 def install_frontend_dependencies():
     """Install frontend dependencies"""
     print("📦 Installing frontend dependencies...")
@@ -236,13 +275,17 @@ def install_frontend_dependencies():
         print("❌ Frontend directory not found")
         return False
     
-    # Check if dependencies already installed
-    if (frontend_dir / "node_modules").exists():
-        print("✅ Frontend dependencies already installed")
+    # Enhanced check for dependencies
+    if check_frontend_dependencies():
+        print("✅ Frontend dependencies already installed and verified")
         return True
+    
+    print("🔄 Installing/updating frontend dependencies...")
     
     try:
         npm_cmd = 'npm.cmd' if platform.system() == 'Windows' else 'npm'
+        
+        # First, try npm install
         if platform.system() == 'Windows':
             install_cmd = ['cmd', '/c', f'{npm_cmd} install']
             result = subprocess.run(install_cmd, cwd=frontend_dir, shell=True, timeout=300)
@@ -251,14 +294,36 @@ def install_frontend_dependencies():
             result = subprocess.run(install_cmd, cwd=frontend_dir, timeout=300)
         
         if result.returncode == 0:
-            print("✅ Frontend dependencies installed successfully")
-            return True
+            # Verify installation after npm install
+            if check_frontend_dependencies():
+                print("✅ Frontend dependencies installed and verified successfully")
+                return True
+            else:
+                print("⚠️ Frontend dependencies installed but verification failed")
+                print("💡 Trying npm ci for clean install...")
+                
+                # Try npm ci as fallback
+                if platform.system() == 'Windows':
+                    ci_cmd = ['cmd', '/c', f'{npm_cmd} ci']
+                    result2 = subprocess.run(ci_cmd, cwd=frontend_dir, shell=True, timeout=300)
+                else:
+                    ci_cmd = [npm_cmd, 'ci']
+                    result2 = subprocess.run(ci_cmd, cwd=frontend_dir, timeout=300)
+                
+                if result2.returncode == 0 and check_frontend_dependencies():
+                    print("✅ Frontend dependencies installed with npm ci")
+                    return True
+                else:
+                    print("❌ Frontend dependency installation verification failed")
+                    return False
         else:
             print("❌ Failed to install frontend dependencies")
+            print("💡 Try running 'npm install' manually in the frontend directory")
             return False
             
     except subprocess.TimeoutExpired:
-        print("❌ Frontend dependency installation timed out")
+        print("❌ Frontend dependency installation timed out (5 minutes)")
+        print("💡 Try running installation manually or check internet connection")
         return False
     except Exception as e:
         print(f"❌ Error installing frontend dependencies: {e}")

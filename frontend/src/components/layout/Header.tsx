@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Clock } from '@/components/ui/clock';
 import { FilterState } from '@/types/paper';
 interface HeaderProps {
   filters: FilterState;
@@ -59,6 +60,10 @@ export function Header({
                   {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
                 </Badge>}
             </div>
+          </div>
+          {/* Real-time Clock */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-background/60 border rounded-lg">
+            <Clock format="24" showSeconds={true} className="text-sm" />
           </div>
         </div>
 
@@ -125,25 +130,28 @@ export function Header({
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70 bg-muted/30 px-3 py-1.5 rounded-full border lg:self-end">
-            <span className="font-medium">Powered by</span>
-            <a 
-              href="https://claude.ai/code" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-orange-600 hover:text-orange-700 transition-colors font-semibold hover:underline"
-            >
-              Claude Code
-            </a>
-            <span className="text-muted-foreground/50">&</span>
-            <a 
-              href="https://lovable.dev" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-pink-500 hover:text-pink-600 transition-colors font-semibold hover:underline"
-            >
-              Lovable
-            </a>
+          <div className="flex items-center gap-4 lg:self-end">
+            {/* Powered by credits */}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/70 bg-muted/30 px-3 py-1.5 rounded-full border">
+              <span className="font-medium">Powered by</span>
+              <a 
+                href="https://claude.ai/code" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-orange-600 hover:text-orange-700 transition-colors font-semibold hover:underline"
+              >
+                Claude Code
+              </a>
+              <span className="text-muted-foreground/50">&</span>
+              <a 
+                href="https://lovable.dev" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-pink-500 hover:text-pink-600 transition-colors font-semibold hover:underline"
+              >
+                Lovable
+              </a>
+            </div>
           </div>
         </div>
       </div>
