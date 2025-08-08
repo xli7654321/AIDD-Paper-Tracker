@@ -4,6 +4,8 @@
 
 *Read this in other languages: [English](README.md), [中文](README-zh.md)*
 
+![AIDD Paper Tracker](home.png)
+
 ## Overview
 
 AIDD Paper Tracker is a specialized system for automated collection, management, and analysis of AI drug discovery-related academic papers. It integrates multiple preprint servers (arXiv, bioRxiv, ChemRxiv) and provides a modern web interface for browsing, filtering, and tagging paper relevance.

@@ -2,6 +2,8 @@
 
 **AIDD Paper Tracker**: 一个用于跟踪和管理AI药物发现相关学术论文的全栈应用系统。
 
+![AIDD Paper Tracker](home.png)
+
 ## 项目概述
 
 AIDD Paper Tracker 是一个专门用于自动化收集、管理和分析AI药物发现相关学术论文的系统。它集成了多个预印本服务器（arXiv、bioRxiv、ChemRxiv），提供了现代化的Web界面来浏览、过滤和标记论文的相关性。
