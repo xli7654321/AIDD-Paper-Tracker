@@ -28,7 +28,7 @@ AIDD Paper Tracker is a specialized system for automated collection, management,
 - **shadcn/ui**
 - **SQLite**
 
-### Data Sources
+## Data Sources
 - **arXiv**: cs.LG, cs.AI, q-bio, physics.chem-ph categories
 - **bioRxiv**: biochemistry, bioinformatics, biophysics, synthetic biology
 - **ChemRxiv**: theoretical_computational, biological_medicinal
@@ -37,9 +37,9 @@ AIDD Paper Tracker is a specialized system for automated collection, management,
 
 ### Prerequisites
 
-- Python 3.10+ 
-- Node.js 22+
-- npm
+- **Conda** (Miniconda or Anaconda) - [Download here](https://docs.conda.io/en/latest/miniconda.html)
+- **Node.js 18+** - [Download here](https://nodejs.org/)
+- **npm** (comes with Node.js)
 
 ### Quick Start
 
@@ -49,15 +49,19 @@ AIDD Paper Tracker is a specialized system for automated collection, management,
    cd AIDD-Paper-Tracker
    ```
 
-2. **One-click startup** (Recommended)
+2. **One-click startup with conda environment** (Recommended)
    ```bash
    python run.py
    ```
    
-   This script will automatically:
-   - Check and install Python dependencies
-   - Check Node.js and install frontend dependencies  
-   - Start both backend and frontend servers simultaneously
+   This enhanced script will automatically:
+   - **Check for conda installation**
+   - **Create conda environment** `aidd-tracker` with Python 3.10 (if not exists)
+   - **Install Python dependencies** in the conda environment
+   - **Check Node.js and npm availability**
+   - **Install frontend dependencies**
+   - **Create necessary directories** (data, logs)
+   - **Start both backend and frontend servers**
 
 3. **Access the application**
    - Frontend Interface: http://localhost:5173
@@ -68,24 +72,31 @@ AIDD Paper Tracker is a specialized system for automated collection, management,
 
 If you prefer to install and start services separately:
 
-1. **Install Python dependencies**
+1. **Create and activate conda environment**
+   ```bash
+   conda create -n aidd-tracker python=3.10
+   conda activate aidd-tracker
+   ```
+
+2. **Install Python dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Install frontend dependencies**
+3. **Install frontend dependencies**
    ```bash
    cd frontend
    npm install
+   cd ..
    ```
 
-3. **Start backend service**
+4. **Start backend service**
    ```bash
    cd backend
    python run_server.py
    ```
 
-4. **Start frontend service**
+5. **Start frontend service** (in another terminal)
    ```bash
    cd frontend
    npm run dev

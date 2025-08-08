@@ -26,7 +26,7 @@ AIDD Paper Tracker 是一个专门用于自动化收集、管理和分析AI药�
 - **shadcn/ui**
 - **SQLite**
 
-### 数据来源
+## 数据来源
 - **arXiv**: cs.LG, cs.AI, q-bio, physics.chem-ph
 - **bioRxiv**: biochemistry, bioinformatics, biophysics, synthetic biology
 - **ChemRxiv**: Theoretical and Computational Chemistry, Biological and Medicinal Chemistry
@@ -35,9 +35,9 @@ AIDD Paper Tracker 是一个专门用于自动化收集、管理和分析AI药�
 
 ### 前置要求
 
-- Python 3.10+ 
-- Node.js 22+
-- npm
+- **Conda** (Miniconda 或 Anaconda) - [下载链接](https://docs.conda.io/en/latest/miniconda.html)
+- **Node.js 18+** - [下载链接](https://nodejs.org/)
+- **npm** (随Node.js一起安装)
 
 ### 快速开始
 
@@ -47,15 +47,19 @@ AIDD Paper Tracker 是一个专门用于自动化收集、管理和分析AI药�
    cd AIDD-Paper-Tracker
    ```
 
-2. **一键启动** (推荐)
+2. **一键启动与conda环境管理** (推荐)
    ```bash
    python run.py
    ```
    
-   这个脚本会自动：
-   - 检查并安装Python依赖
-   - 检查Node.js并安装前端依赖  
-   - 同时启动后端和前端服务器
+   这个增强版脚本会自动：
+   - **检查conda安装**
+   - **创建conda环境** `aidd-tracker`，使用Python 3.10 (如果不存在)
+   - **在conda环境中安装Python依赖**
+   - **检查Node.js和npm可用性**
+   - **安装前端依赖**
+   - **创建必要的目录** (data, logs)
+   - **启动后端和前端服务器**
 
 3. **访问应用**
    - 前端界面: http://localhost:5173
@@ -66,24 +70,31 @@ AIDD Paper Tracker 是一个专门用于自动化收集、管理和分析AI药�
 
 如果您想要分别安装和启动服务：
 
-1. **安装Python依赖**
+1. **创建并激活conda环境**
+   ```bash
+   conda create -n aidd-tracker python=3.10
+   conda activate aidd-tracker
+   ```
+
+2. **安装Python依赖**
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **安装前端依赖**
+3. **安装前端依赖**
    ```bash
    cd frontend
    npm install
+   cd ..
    ```
 
-3. **启动后端服务**
+4. **启动后端服务**
    ```bash
    cd backend
    python run_server.py
    ```
 
-4. **启动前端服务**
+5. **启动前端服务** (另开一个终端)
    ```bash
    cd frontend
    npm run dev
