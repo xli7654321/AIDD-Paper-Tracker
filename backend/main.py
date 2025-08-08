@@ -146,6 +146,9 @@ async def get_papers(
         # Apply filters (don't pass source filter since we already loaded only requested sources)
         filtered_papers = _filter_papers(papers, categories, relevance_status, date_start, date_end, search_query, None, search_scope)
         
+        # Sort papers based on source
+        filtered_papers = _sort_papers_by_source(filtered_papers)
+        
         # Calculate pagination info
         total_filtered = len(filtered_papers)
         total_pages = (total_filtered + page_size - 1) // page_size if total_filtered > 0 else 1
@@ -572,3 +575,78 @@ def matches_single_category(paper_categories, target_category):
 def matches_single_category_with_source(paper_categories, target_category, paper_source):
     """Check if paper categories match a single target category with source constraint"""
     return matches_category_filter(paper_categories, [target_category], paper_source)
+
+def _sort_papers_by_source(papers):
+    """Sort papers based on their source type"""
+    from datetime import datetime
+    
+    def parse_paper_date(date_str):
+        """Parse paper date string for sorting"""
+        if not date_str:
+            return datetime.min
+        
+        date_formats = [
+            '%d %B, %Y',
+            '%Y-%m-%d', 
+            '%Y-%m-%dT%H:%M:%S',
+            '%Y-%m-%dT%H:%M:%SZ',
+        ]
+        
+        for fmt in date_formats:
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
+                continue
+        
+        import re
+        match = re.search(r'(\d{4})-(\d{1,2})-(\d{1,2})', date_str)
+        if match:
+            year, month, day = match.groups()
+            return datetime(int(year), int(month), int(day))
+        
+        return datetime.min
+    
+    def parse_arxiv_id(paper_id):
+        """Parse arXiv ID for sorting"""
+        try:
+            if not paper_id or '.' not in paper_id:
+                return (0, 0, 0)
+            
+            year_month, sequence = paper_id.split('.', 1)
+            if len(year_month) != 4:
+                return (0, 0, 0)
+            
+            year = int('20' + year_month[:2])
+            month = int(year_month[2:4])
+            
+            sequence_num = ''
+            for char in sequence:
+                if char.isdigit():
+                    sequence_num += char
+                else:
+                    break
+            
+            seq = int(sequence_num) if sequence_num else 0
+            return (year, month, seq)
+            
+        except (ValueError, IndexError):
+            return (0, 0, 0)
+    
+    # Separate papers by source
+    chemrxiv_papers = []
+    other_papers = []
+    
+    for paper in papers:
+        if paper.get('source', '').lower() == 'chemrxiv':
+            chemrxiv_papers.append(paper)
+        else:
+            other_papers.append(paper)
+    
+    # Sort ChemRxiv papers by date (newest first)
+    chemrxiv_papers.sort(key=lambda p: parse_paper_date(p.get('published_date', '')), reverse=True)
+    
+    # Sort other papers (arXiv, bioRxiv) by ID (newest first)
+    other_papers.sort(key=lambda p: parse_arxiv_id(p.get('id', '')), reverse=True)
+    
+    # Combine sorted papers
+    return chemrxiv_papers + other_papers

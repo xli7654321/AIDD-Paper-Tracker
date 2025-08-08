@@ -37,16 +37,38 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
   }, []);
 
   const handleSourceChange = (source: string, checked: boolean) => {
+    let newSources: string[];
+    
     if (source === 'all') {
       // If "All Sources" is checked, select all sources; if unchecked, clear all
-      const newSources = checked ? ['arxiv', 'biorxiv', 'chemrxiv'] : [];
-      onFiltersChange({ ...filters, sources: newSources });
+      newSources = checked ? ['arxiv', 'biorxiv', 'chemrxiv'] : [];
     } else {
-      const newSources = checked
+      newSources = checked
         ? [...filters.sources, source]
         : filters.sources.filter(s => s !== source);
-      onFiltersChange({ ...filters, sources: newSources });
     }
+    
+    // Filter out categories that are no longer available based on selected sources
+    const availableCategories = newSources.reduce((acc: string[], sourceName) => {
+      const sourceKey = Object.keys(categoriesBySource).find(key => 
+        key.toLowerCase() === sourceName
+      ) as keyof typeof categoriesBySource;
+      
+      if (sourceKey && categoriesBySource[sourceKey]) {
+        acc.push(...categoriesBySource[sourceKey].map(cat => cat.id));
+      }
+      return acc;
+    }, []);
+    
+    const newCategories = filters.categories.filter(categoryId => 
+      availableCategories.includes(categoryId)
+    );
+    
+    onFiltersChange({ 
+      ...filters, 
+      sources: newSources,
+      categories: newCategories
+    });
   };
 
   const handleCategoryChange = (category: string, checked: boolean) => {
@@ -119,13 +141,26 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
     setDateRangeOption('all-time');
     
     onFiltersChange({
-      sources: [],
+      sources: ['arxiv', 'biorxiv', 'chemrxiv'],
       categories: [],
       relevanceStatus: [],
       dateRange: { start: null, end: null },
       searchQuery: '',
       searchScope: 'title',
     });
+  };
+
+  // Helper function to check if a category should be enabled based on selected sources
+  const isCategoryEnabled = (categoryId: string) => {
+    // Find which source this category belongs to
+    const sourceName = Object.keys(categoriesBySource).find(source => 
+      categoriesBySource[source as keyof typeof categoriesBySource]?.some(cat => cat.id === categoryId)
+    );
+    
+    if (!sourceName) return false;
+    
+    // Check if the corresponding source is selected
+    return filters.sources.includes(sourceName.toLowerCase());
   };
 
   if (isCollapsed) {
@@ -364,26 +399,30 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-2">arXiv</div>
               <div className="space-y-2">
-                {categoriesBySource.arXiv?.map((category) => (
-                  <div key={category.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${category.id}`}
-                        checked={filters.categories.includes(category.id)}
-                        onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
-                      />
-                      <label
-                        htmlFor={`category-${category.id}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {category.id}
-                      </label>
+                {categoriesBySource.arXiv?.map((category) => {
+                  const enabled = isCategoryEnabled(category.id);
+                  return (
+                    <div key={category.id} className={`flex items-center justify-between ${!enabled ? 'opacity-50' : ''}`}>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={filters.categories.includes(category.id)}
+                          onCheckedChange={(checked) => enabled && handleCategoryChange(category.id, checked as boolean)}
+                          disabled={!enabled}
+                        />
+                        <label
+                          htmlFor={`category-${category.id}`}
+                          className={`text-sm ${enabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        >
+                          {category.id}
+                        </label>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {stats.byCategory[category.id] || 0}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {stats.byCategory[category.id] || 0}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -393,26 +432,30 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-2">bioRxiv</div>
               <div className="space-y-2">
-                {categoriesBySource.bioRxiv?.map((category) => (
-                  <div key={category.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${category.id}`}
-                        checked={filters.categories.includes(category.id)}
-                        onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
-                      />
-                      <label
-                        htmlFor={`category-${category.id}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {category.id}
-                      </label>
+                {categoriesBySource.bioRxiv?.map((category) => {
+                  const enabled = isCategoryEnabled(category.id);
+                  return (
+                    <div key={category.id} className={`flex items-center justify-between ${!enabled ? 'opacity-50' : ''}`}>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={filters.categories.includes(category.id)}
+                          onCheckedChange={(checked) => enabled && handleCategoryChange(category.id, checked as boolean)}
+                          disabled={!enabled}
+                        />
+                        <label
+                          htmlFor={`category-${category.id}`}
+                          className={`text-sm ${enabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        >
+                          {category.id}
+                        </label>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {stats.byCategory[category.id] || 0}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {stats.byCategory[category.id] || 0}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -422,26 +465,30 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
             <div>
               <div className="text-xs font-medium text-muted-foreground mb-2">ChemRxiv</div>
               <div className="space-y-2">
-                {categoriesBySource.ChemRxiv?.map((category) => (
-                  <div key={category.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${category.id}`}
-                        checked={filters.categories.includes(category.id)}
-                        onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
-                      />
-                      <label
-                        htmlFor={`category-${category.id}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {category.name}
-                      </label>
+                {categoriesBySource.ChemRxiv?.map((category) => {
+                  const enabled = isCategoryEnabled(category.id);
+                  return (
+                    <div key={category.id} className={`flex items-center justify-between ${!enabled ? 'opacity-50' : ''}`}>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category.id}`}
+                          checked={filters.categories.includes(category.id)}
+                          onCheckedChange={(checked) => enabled && handleCategoryChange(category.id, checked as boolean)}
+                          disabled={!enabled}
+                        />
+                        <label
+                          htmlFor={`category-${category.id}`}
+                          className={`text-sm ${enabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                        >
+                          {category.name}
+                        </label>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {stats.byCategory[category.id] || 0}
+                      </Badge>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {stats.byCategory[category.id] || 0}
-                    </Badge>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </CardContent>
@@ -486,7 +533,7 @@ export function Sidebar({ filters, onFiltersChange, stats, isCollapsed, onToggle
           onClick={clearAllFilters}
           className="w-full"
           disabled={
-            filters.sources.length === 0 &&
+            filters.sources.length === 3 && filters.sources.includes('arxiv') && filters.sources.includes('biorxiv') && filters.sources.includes('chemrxiv') &&
             filters.categories.length === 0 &&
             filters.relevanceStatus.length === 0 &&
             dateRangeOption === 'all-time' &&

@@ -22,7 +22,7 @@ const Index = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
-    sources: [],
+    sources: ['arxiv', 'biorxiv', 'chemrxiv'],
     categories: [],
     relevanceStatus: [],
     dateRange: { start: null, end: null },
@@ -56,16 +56,7 @@ const Index = () => {
   const rawPapers = papersData?.papers || [];
   const paginationInfo = papersData?.pagination;
 
-  // Sort papers with ChemRxiv papers by published date descending
-  const papers = rawPapers.sort((a: Paper, b: Paper) => {
-    // Only sort ChemRxiv papers by date, keep other sources as-is
-    if (a.source === 'chemrxiv' && b.source === 'chemrxiv') {
-      const dateA = new Date(a.published_date).getTime();
-      const dateB = new Date(b.published_date).getTime();
-      return dateB - dateA; // Descending order (newest first)
-    }
-    return 0; // Keep original order for other sources
-  });
+  const papers = rawPapers;
 
   // Query stats - use same filters as papers query
   const { data: stats } = useQuery({

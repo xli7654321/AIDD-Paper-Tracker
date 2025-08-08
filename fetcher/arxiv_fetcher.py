@@ -295,6 +295,8 @@ class ArxivFetcher:
             for part in date.split(';'):
                 if 'Submitted' in part:
                     submitted_date = part.replace('Submitted', '').strip()
+                    # Convert date format from "1 August, 2025" to "2025-08-01"
+                    submitted_date = self._convert_date_format(submitted_date)
                     break
             
             categories_elem = element.select_one('div.tags')
@@ -314,6 +316,24 @@ class ArxivFetcher:
         except Exception as e:
             self.logger.error(f"解析论文元素失败: {e}")
             return None
+    
+    def _convert_date_format(self, date_str: str) -> str:
+        """
+        Convert date from arXiv format "1 August, 2025" to ISO format "2025-08-01"
+        """
+        try:
+            # Parse the date string in arXiv format
+            date_obj = datetime.strptime(date_str, '%d %B, %Y')
+            # Return in ISO format
+            return date_obj.strftime('%Y-%m-%d')
+        except ValueError:
+            try:
+                # Try alternative format without comma: "1 August 2025"
+                date_obj = datetime.strptime(date_str, '%d %B %Y')
+                return date_obj.strftime('%Y-%m-%d')
+            except ValueError:
+                self.logger.warning(f"无法解析日期格式: {date_str}")
+                return date_str  # Return original if parsing fails
     
 if __name__ == '__main__':
     fetcher = ArxivFetcher()

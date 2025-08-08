@@ -138,8 +138,12 @@ export function Header({
                 href="https://claude.ai/code" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-orange-600 hover:text-orange-700 transition-colors font-semibold hover:underline"
+                className="transition-colors font-semibold hover:underline flex items-center gap-1"
+                style={{ color: '#D97757' }}
+                onMouseEnter={(e) => e.target.style.color = '#C1654F'}
+                onMouseLeave={(e) => e.target.style.color = '#D97757'}
               >
+                <img src="/claude.svg" alt="Claude" className="w-4 h-4" />
                 Claude Code
               </a>
               <span className="text-muted-foreground/50">&</span>
@@ -147,8 +151,9 @@ export function Header({
                 href="https://lovable.dev" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-pink-500 hover:text-pink-600 transition-colors font-semibold hover:underline"
+                className="text-pink-500 hover:text-pink-600 transition-colors font-semibold hover:underline flex items-center gap-1"
               >
+                <img src="/lovable.svg" alt="Lovable" className="w-4 h-4" />
                 Lovable
               </a>
             </div>
